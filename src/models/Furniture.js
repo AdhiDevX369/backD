@@ -5,6 +5,7 @@ const furnitureSchema = new mongoose.Schema({
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
   basePrice: { type: Number, required: true },
   description: String,
+  imageUrl: { type: String },  // Adding image URL field
   woodTypes: [{
     woodType: { type: mongoose.Schema.Types.ObjectId, ref: 'Wood' },
     priceMultiplier: Number

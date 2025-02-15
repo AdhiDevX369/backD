@@ -3,25 +3,20 @@ const User = require('../models/User');
 
 exports.protect = async (req, res, next) => {
   try {
-    // Check if authorization header exists
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    // Get token from header
     const token = authHeader.split(' ')[1];
     
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Check if user still exists
-    const user = await User.findById(decoded.id);
+    const user = await User.findOne({ _id: decoded.id, is_active: true });
     if (!user) {
-      return res.status(401).json({ error: 'User no longer exists' });
+      return res.status(401).json({ error: 'User no longer exists or has been deactivated' });
     }
     
-    // Add user to request
     req.user = user;
     next();
   } catch (error) {

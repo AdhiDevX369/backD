@@ -8,7 +8,8 @@ const furnitureSchema = new mongoose.Schema({
   woodTypes: [{
     woodType: { type: mongoose.Schema.Types.ObjectId, ref: 'Wood' },
     priceMultiplier: Number
-  }]
+  }],
+  is_active: { type: Boolean, default: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Furniture', furnitureSchema);

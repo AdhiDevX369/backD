@@ -5,5 +5,7 @@ const { protect, restrictTo } = require('../middlewares/authMiddleware');
 
 router.get('/', woodController.getAllWoods);
 router.post('/', protect, restrictTo('admin'), woodController.createWood);
+router.put('/:id', protect, restrictTo('admin'), woodController.updateWood);
+router.delete('/:id', protect, restrictTo('admin'), woodController.deleteWood);
 
 module.exports = router;

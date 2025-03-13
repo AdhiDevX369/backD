@@ -11,6 +11,7 @@ const woodRoutes = require("./routes/woodRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const checkoutRoutes = require("./routes/checkoutRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/woods", woodRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -38,16 +38,20 @@ exports.addToCart = async (req, res) => {
       cart = await Cart.create({ user: req.user.id, items: [] });
     }
 
-    const woodType = furniture.woodTypes.find(
-      (w) => w.woodType.toString() === woodTypeId
+    const woodTypeItem = furniture.woodTypes.find(
+      (w) => w._id.toString() === woodTypeId
     );
-    const price =
-      furniture.basePrice * (woodType ? woodType.priceMultiplier : 1);
+
+    if (!woodTypeItem) {
+      return res.status(404).json({ error: "Wood type not found" });
+    }
+
+    const price = furniture.basePrice * woodTypeItem.priceMultiplier;
 
     const existingItem = cart.items.find(
       (item) =>
         item.furniture.toString() === furnitureId &&
-        item.woodType.toString() === woodTypeId
+        item.woodType?.toString() === woodTypeItem.woodType.toString()
     );
 
     if (existingItem) {
@@ -57,7 +61,7 @@ exports.addToCart = async (req, res) => {
       cart.items.push({
         furniture: furnitureId,
         quantity,
-        woodType: woodTypeId,
+        woodType: woodTypeItem.woodType, // Store the actual Wood reference, not the _id of the woodTypes array item
         price: price * quantity,
       });
     }
@@ -164,6 +168,29 @@ exports.updateCartItem = async (req, res) => {
         price: cartItem.price,
         unitPrice: unitPrice,
       },
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.clearCart = async (req, res) => {
+  try {
+    // Find cart only for the current authenticated user
+    const cart = await Cart.findOne({ user: req.user.id });
+    if (!cart) {
+      return res.status(404).json({ error: "Cart not found" });
+    }
+
+    // Clear cart items and reset total amount for this user only
+    cart.items = [];
+    cart.totalAmount = 0;
+    await cart.save();
+
+    res.json({
+      success: true,
+      message: "Cart cleared successfully",
+      cart,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });

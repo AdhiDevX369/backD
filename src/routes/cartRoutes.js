@@ -10,5 +10,6 @@ router.get("/", cartController.getCart);
 router.post("/add", cartController.addToCart);
 router.delete("/item/:itemId", cartController.removeFromCart);
 router.put("/item/update/:itemId", cartController.updateCartItem);
+router.delete("/clear", cartController.clearCart); // Add new route for clearing the cart
 
 module.exports = router;

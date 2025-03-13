@@ -1,6 +1,6 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const User = require("../models/User");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 exports.register = async (req, res) => {
   try {
@@ -9,7 +9,7 @@ exports.register = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: "24h" }
     );
     res.status(201).json({
       success: true,
@@ -18,8 +18,8 @@ exports.register = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -30,17 +30,17 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email, is_active: true });
-    
+
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
-    
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: "24h" }
     );
-    
+
     res.json({
       success: true,
       token,
@@ -48,8 +48,8 @@ exports.login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -58,7 +58,7 @@ exports.login = async (req, res) => {
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find({ is_active: true }).select('-password');
+    const users = await User.find({ is_active: true }).select("-password");
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -67,9 +67,12 @@ exports.getUsers = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.params.id, is_active: true }).select('-password');
+    const user = await User.findOne({
+      _id: req.params.id,
+      is_active: true,
+    }).select("-password");
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
     res.json(user);
   } catch (error) {
@@ -81,17 +84,19 @@ exports.updateProfile = async (req, res) => {
   try {
     const userId = req.params.id;
     // Check if user is updating their own profile or is an admin
-    if (req.user.role !== 'admin' && req.user._id.toString() !== userId) {
-      return res.status(403).json({ error: 'You can only update your own profile' });
+    if (req.user.role !== "admin" && req.user._id.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ error: "You can only update your own profile" });
     }
 
     const user = await User.findOne({ _id: userId, is_active: true });
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     // Don't allow role updates unless admin
-    if (req.body.role && req.user.role !== 'admin') {
+    if (req.body.role && req.user.role !== "admin") {
       delete req.body.role;
     }
 
@@ -106,12 +111,76 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
+exports.updateProfileWithPassword = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { currentPassword, newPassword, ...userData } = req.body;
+
+    // Check if user is updating their own profile or is an admin
+    if (req.user.role !== "admin" && req.user._id.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ error: "You can only update your own profile" });
+    }
+
+    const user = await User.findOne({ _id: userId, is_active: true });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Never allow role updates through this endpoint
+    delete userData.role;
+
+    // If password update is requested, verify current password
+    if (newPassword) {
+      if (!currentPassword) {
+        return res
+          .status(400)
+          .json({
+            error: "Current password is required to set a new password",
+          });
+      }
+
+      // Verify current password
+      const isPasswordValid = await bcrypt.compare(
+        currentPassword,
+        user.password
+      );
+      if (!isPasswordValid) {
+        return res.status(400).json({ error: "Current password is incorrect" });
+      }
+
+      // Set the new password
+      user.password = newPassword;
+    }
+
+    // Update other user data
+    Object.assign(user, userData);
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 exports.deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
     // Check if user is deleting their own account or is an admin
-    if (req.user.role !== 'admin' && req.user._id.toString() !== userId) {
-      return res.status(403).json({ error: 'You can only delete your own account' });
+    if (req.user.role !== "admin" && req.user._id.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ error: "You can only delete your own account" });
     }
 
     const user = await User.findOneAndUpdate(
@@ -121,10 +190,10 @@ exports.deleteUser = async (req, res) => {
     );
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
-    res.json({ message: 'User deleted successfully' });
+    res.json({ message: "User deleted successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

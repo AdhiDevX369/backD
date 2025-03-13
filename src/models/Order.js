@@ -8,6 +8,7 @@ const orderSchema = new mongoose.Schema({
     quantity: Number,
     price: Number
   }],
+  imageUrl: { type: String ,required: true }, 
   totalAmount: { type: Number, required: true },
   status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
   description: { type: String },

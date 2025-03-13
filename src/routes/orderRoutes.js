@@ -11,6 +11,7 @@ router.put('/:id/status', protect, restrictTo('admin'), orderController.updateOr
 router.delete('/:id', protect, restrictTo('admin'), orderController.deleteOrder);
 router.get('/status/accepted', protect, restrictTo('admin'), orderController.getAcceptedOrders);
 router.get('/status/rejected', protect, restrictTo('admin'), orderController.getRejectedOrders);
+router.get('/status/pending', protect, restrictTo('admin'), orderController.getPendingOrders);
 router.put('/:id', protect, orderController.updateOrder);
 
 module.exports = router;

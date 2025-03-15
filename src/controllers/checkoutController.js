@@ -15,7 +15,7 @@ exports.createCheckoutSession = async (req, res) => {
 
       return {
         price_data: {
-          currency: "usd",
+          currency: "lkr",
           product_data: {
             name: item.furniture.name || "Furniture Item",
             description: item.woodType

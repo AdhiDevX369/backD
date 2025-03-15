@@ -64,7 +64,11 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     const { status, description, deliveryDate } = req.body;
-    if (!["pending", "accepted", "rejected"].includes(status)) {
+    if (
+      !["pending", "accepted", "rejected", "shipped", "delivered"].includes(
+        status
+      )
+    ) {
       return res.status(400).json({ error: "Invalid status value" });
     }
 
@@ -75,11 +79,9 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     if ((status === "accepted" || status === "rejected") && !description) {
-      return res
-        .status(400)
-        .json({
-          error: "Description is required when accepting or rejecting an order",
-        });
+      return res.status(400).json({
+        error: "Description is required when accepting or rejecting an order",
+      });
     }
 
     const order = await Order.findOne({ _id: req.params.id, is_active: true });
@@ -192,5 +194,29 @@ exports.updateOrder = async (req, res) => {
     res.json(order);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+exports.getShippedOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ status: "shipped", is_active: true })
+      .populate("items.furniture")
+      .populate("items.woodType")
+      .populate("user", "-password");
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getDeliveredOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ status: "delivered", is_active: true })
+      .populate("items.furniture")
+      .populate("items.woodType")
+      .populate("user", "-password");
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

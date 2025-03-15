@@ -33,4 +33,10 @@ router.put(
 );
 router.delete("/users/:id", protect, authController.deleteUser);
 
+// Forgot password route - initiate reset
+router.post("/forgot-password", authController.forgotPassword);
+
+// Reset password route - complete reset with token
+router.post("/reset-password/:token", authController.resetPassword);
+
 module.exports = router;

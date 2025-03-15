@@ -26,7 +26,7 @@ exports.sendContactEmail = async (req, res) => {
 
     // Email content
     const mailOptions = {
-      from: process.env.EMAIL_FROM || "your-email@example.com",
+      from: email || "your-email@example.com",
       to: process.env.EMAIL_TO || "info@woodcrafts.com",
       subject: `Contact Form: ${subject}`,
       html: `

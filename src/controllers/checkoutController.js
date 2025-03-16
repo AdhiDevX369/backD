@@ -34,7 +34,7 @@ exports.createCheckoutSession = async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${req.headers.origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.origin}/orders`,
       cancel_url: `${req.headers.origin}/cart`,
       // Enable shipping address collection
       shipping_address_collection: {
